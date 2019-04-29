@@ -1,0 +1,8 @@
+library(pxR)
+energy_balance_by_type_and_year <- as.data.frame (read.px("SEI01.px"))
+energy_production_by_type_and_year <- as.data.frame (read.px("SEI02.px"))
+energy_imports_by_type_and_year <- as.data.frame (read.px("SEI03.px"))
+fuel_used_in_electricity <- as.data.frame (read.px("SEI04.px"))
+gross_energy_by_type_by_year <- as.data.frame (read.px("SEI05.px"))
+fuel_con_by_sector_by_year <- as.data.frame (read.px("SEI05.px"))
+str(fuel_type_by_year)
