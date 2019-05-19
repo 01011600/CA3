@@ -1,61 +1,39 @@
 library(dplyr)
 library(pwr)
-#energy_balance_by_type_and_year <- as.data.frame (read.px("SEI01.px"))
-energy_production_by_type_and_year <- as.data.frame (read.px("SEI02.px"))
-energy_imports_by_type_and_year <- as.data.frame (read.px("SEI03.px"))
-fuel_used_in_electricity <- as.data.frame (read.px("SEI04.px"))
-gross_energy_by_type_by_year <- as.data.frame (read.px("SEI05.px"))
-fuel_con_by_sector_by_year <- as.data.frame (read.px("SEI05.px"))
-ghg_to_air_sector_by_year <- as.data.frame (read.px("EAA10.px"))
-ireland_temperature <- as.data.frame (read.px("MTM02.px"))
-
 library(pxR)
-# read in px file as a data frame called ghg_by_sector_by_year
-ghg_by_sector_by_year <- as.data.frame (read.px("EAA09.px"))
-# Print the structure of the dataframe ghg_by_sector_by_year
-str(ghg_by_sector_by_year)
-# create new dataframe called ghg_summary_year and using grep select the Greenhouse Gas Emissions
-ghg_summary_year <- ghg_by_sector_by_year[grepl("Greenhouse Gas Emissions",ghg_by_sector_by_year$Statistic),]
-#Print the structure of the dataframe ghg_summary_year
-str(ghg_summary_year)
 
-library(ggplot2) 
-# Create a bar graph using ggplot to plot the total GHG by year
-ggplot(data=ghg_summary_year,aes(Year,Value,Statistic))+
-  theme(panel.grid.minor = element_line(colour = "grey"), plot.title = element_text(size = rel(1)),axis.text.x = element_text(angle=90, vjust=1), strip.text.x = element_text(size = 12, colour = "black", face = "bold")) +  
-  geom_point(alpha = 0.6, position = position_jitter(w = 0.1, h = 0.0), aes(colour=factor(Year)), size =4)+
-  geom_bar(stat="identity",fill="steelblue")+
-  ggtitle("Greenhouse Gas Emissions (CO2,N2O,CH4,HFC,PFC,SF6) ") +
-  scale_size_area() + 
-  xlab("Year")+ 
-  ylab(" 000 Tonnes CO2 Equivalents")
-
-library(pxR)
 # read in px file as a data frame called ireland_temperature
 ireland_temperature <- as.data.frame (read.px("MTM02.px"))
 # Print the structure of the dataframe ghg_by_sector_by_year
 str(ireland_temperature)
 # create new dataframe called ghg_summary_year and using grep select the Greenhouse Gas Emissions
 ireland_temperature_mean <- ireland_temperature[grepl("Mean Temperature",ireland_temperature$Statistic),]
-ireland_temperature_mean["Year"] <- ireland_temperature_mean$Month
 # Create new column called Year 
+ireland_temperature_mean["Year"] <- ireland_temperature_mean$Month
+
 ireland_temperature_mean$Year <- as.Date(format(date,'%Y'))
 ireland_temperature_mean$Year <- substr(ireland_temperature_mean$Year, 0, 4)
 ireland_temperature_mean$Year <- as.factor(ireland_temperature_mean$Year)
+ireland_temp_mean_no_na <- na.omit(ireland_temperature_mean)
+hist(ireland_temp_mean_no_na$value, col= "red")
+barplot()
 
+# Make a summary of the data ireland_temp_mean_no_na by Year, median temp by year
+Data_Summary <- ireland_temp_mean_no_na %>% group_by(Year) %>% summarize(Median_Temperature_C=median(value) )
+# Delete Row with 2019 data as not full year
+Median_temp_2018<- Data_Summary[-c(62),] 
+#Median_temp_2018 <- as.numeric(Median_temp_2018$Year)
+plot(Median_temp_2018$Year, Median_temp_2018$Median_Temperature_C, col='red')
+str(Data_Summary)
+str(Data_Summary)
+barplot(1:2, col ="green")
 #Print the structure of the dataframe ghg_summary_year
 str(ghg_summary_year)
 
 library(XLConnect)
 wb = loadWorkbook("GHG_Final data_1990-2017_website.xlsx")
 epa_2019_summary <- readWorksheet(wb, sheet = "1", header = TRUE)
-#Make row 1 the colun name
-# use lapply to map all the data to characters then to assign them as the headers
-#colnames(epa_2019_summary) <- c("Source of GHG", "1990", "1991", "1992","1993", "1994", "1995","1996",
-#                                "1997", "1998","1999", "2000", "2001", "2002","2003", "2004",
-#                                "2005", "2006","2007","2008","2009","2010","2011","2012","2013",
-#                                "2014","2015","2016","2017","% Share 2017","% Change 1990-2017","NA",
-#                                "Annual change","kt CO2","NA")
+
 colnames(epa_2019_summary)
 str(epa_2019_summary)
 na.omit(epa_2019_summary)
@@ -64,6 +42,8 @@ epa_2019_summary$Year <- as.factor(epa_2019_summary$Year)
 epa_2019_summary$Chemical.industry <- as.numeric(epa_2019_summary$Chemical.industry)
 epa_2019_summary$Metal.industry <- as.numeric(epa_2019_summary$Metal.industry)
 str(epa_2019_summary)
+
+
 
 res <- cor(epa_2019_summary)
 round(res, 2)
@@ -247,3 +227,33 @@ plot(power_test)
 # to get the test statistic (W) as well as the p value
 wilcox.test(Value ~ Year, data = co2_2019 )
 # The p-value returned was 2.2e-16 which is <0.05 so reject the null hypothesis.
+
+
+#************************************ NOT USED IN FINAL REPORT*************************
+#energy_balance_by_type_and_year <- as.data.frame (read.px("SEI01.px"))
+#energy_production_by_type_and_year <- as.data.frame (read.px("SEI02.px"))
+#fuel_used_in_electricity <- as.data.frame (read.px("SEI04.px"))
+#gross_energy_by_type_by_year <- as.data.frame (read.px("SEI05.px"))
+#fuel_con_by_sector_by_year <- as.data.frame (read.px("SEI05.px"))
+#ghg_to_air_sector_by_year <- as.data.frame (read.px("EAA10.px"))
+
+
+# read in px file as a data frame called ghg_by_sector_by_year
+ghg_by_sector_by_year <- as.data.frame (read.px("EAA09.px"))
+# Print the structure of the dataframe ghg_by_sector_by_year
+str(ghg_by_sector_by_year)
+# create new dataframe called ghg_summary_year and using grep select the Greenhouse Gas Emissions
+ghg_summary_year <- ghg_by_sector_by_year[grepl("Greenhouse Gas Emissions",ghg_by_sector_by_year$Statistic),]
+#Print the structure of the dataframe ghg_summary_year
+str(ghg_summary_year)
+
+library(ggplot2) 
+# Create a bar graph using ggplot to plot the total GHG by year
+ggplot(data=ghg_summary_year,aes(Year,Value,Statistic))+
+  theme(panel.grid.minor = element_line(colour = "grey"), plot.title = element_text(size = rel(1)),axis.text.x = element_text(angle=90, vjust=1), strip.text.x = element_text(size = 12, colour = "black", face = "bold")) +  
+  geom_point(alpha = 0.6, position = position_jitter(w = 0.1, h = 0.0), aes(colour=factor(Year)), size =4)+
+  geom_bar(stat="identity",fill="steelblue")+
+  ggtitle("Greenhouse Gas Emissions (CO2,N2O,CH4,HFC,PFC,SF6) ") +
+  scale_size_area() + 
+  xlab("Year")+ 
+  ylab(" 000 Tonnes CO2 Equivalents")
